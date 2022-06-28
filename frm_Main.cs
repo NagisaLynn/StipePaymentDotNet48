@@ -10,11 +10,27 @@ using System.Windows.Forms;
 
 namespace StipePaymentDotNet48
 {
-    public partial class Form1 : Form
+    public partial class frm_Main : Form
     {
-        public Form1()
+        public frm_Main()
         {
             InitializeComponent();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            StripePayment.CustomerCreateOptions();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            var test = StripePayment.CustomerCreateOptions();
+            StripePayment.SetupIntentCreateOptions(test);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            StripePayment.PayCommand();
         }
     }
 }
