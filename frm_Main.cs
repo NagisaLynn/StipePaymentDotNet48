@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Stripe;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,6 +13,8 @@ namespace StipePaymentDotNet48
 {
     public partial class frm_Main : Form
     {
+
+
         public frm_Main()
         {
             InitializeComponent();
@@ -30,7 +33,25 @@ namespace StipePaymentDotNet48
 
         private void button3_Click(object sender, EventArgs e)
         {
+            StripePayment.PayAsCustomerorGuest = false;
             StripePayment.PayCommand();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            var result = StripePayment.RetrieveCardByCustomerId(StripePayment.TestUserInfo);
+            StripePayment.CardRequestId = result.StripeResponse.RequestId;
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            StripePayment.PayAsCustomerorGuest = true;
+            StripePayment.PayCommand();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            StripePayment.PayNow();
         }
     }
 }
