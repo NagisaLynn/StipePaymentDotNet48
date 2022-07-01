@@ -18,16 +18,45 @@ namespace StipePaymentDotNet48
         public static string TestUserName = "Miyamoto Musashi";
         public static string TestCardNumb = "4242424242424242";
         public static string TestUserInfo = "cus_LxTGIsP7ioXDE5";
-        public static string CardRequestId = "card_1LFYKRBRmSsrBJTcYj9jcMsI";
+        public static string TestCardInfo = "card_1LFYKRBRmSsrBJTcYj9jcMsI";
+        public static string TestDescription = "Card Testing by ";
         public static long TestAmount = 20000; // including 2 digit decimal
 
-        private static CreditCardModel _creditCardModel;
         private static TokenService Tokenservice;
         private static Token stripeToken;
         private static bool _isCarcValid;
-        private static bool _isTransectionSuccess;
         public static bool PayAsCustomerorGuest; // true for customer and false for guest
 
+        public static async void Payment_by_Card()
+        {
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+            CancellationToken token = tokenSource.Token;
+            try
+            {
+                var chargeOptions = new ChargeCreateOptions
+                {
+                    Amount = TestAmount,
+                    Currency = "sgd",
+                    Source = TestCardToken(),
+                    Description = TestDescription + " Payment by Card"
+                };
+                var service = new ChargeService();
+                Charge response = service.Create(chargeOptions);
+
+                if (response.Paid)
+                {
+                    Console.Write("Payment Gateway" + "Payment Successful ");
+                }
+                else
+                {
+                    Console.Write("Payment Gateway" + "Payment Failure ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Write("Payment Gatway" + ex.Message);
+            }
+        }
 
         public static string CustomerCreateOptions()
         {
@@ -35,7 +64,8 @@ namespace StipePaymentDotNet48
             {
                 StripeConfiguration.ApiKey = StripeSecretApiKey;
 
-                var options = new CustomerCreateOptions { 
+                var options = new CustomerCreateOptions
+                {
                     Name = TestUserName,
                     Address = new AddressOptions
                     {
@@ -49,7 +79,7 @@ namespace StipePaymentDotNet48
                     Description = "Test Customer",
                     Email = "test@gmail.com",
                     Phone = "45678932",
-                    
+
                 };
 
                 var service = new CustomerService();
@@ -63,55 +93,163 @@ namespace StipePaymentDotNet48
             }
         }
 
-        public static void SetupIntentCreateOptions(string CustomerId)
+        public static async void Payment_by_Customer()
         {
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+            CancellationToken token = tokenSource.Token;
             try
             {
-
-                StripeConfiguration.ApiKey = StripeSecretApiKey;
-               
-                var options = new SetupIntentCreateOptions
+                var service = new PaymentIntentService();
+                var options = new PaymentIntentCreateOptions
                 {
-                    Customer = CustomerId,
-                    //PaymentMethod = CreateCardToken(),
-                    PaymentMethodTypes = new List<string>
-                      {
-                        "card"
-                      },
-                    //PaymentMethodTypes = new List<string> { "type = card and  },
+                    Amount = TestAmount,
+                    Currency = "sgd",
+                    Customer = TestUserInfo,
+                    PaymentMethod = TestCardInfo,
+                    Confirm = true,
+                    OffSession = true,
+                    Description = TestDescription + " Payment by Customer"
                 };
-                CreatCard(CustomerId);
-                var service = new SetupIntentService();
-                service.Create(options);
+                PaymentIntent response = service.Create(options);
+
+                if (response.StripeResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Console.Write("Payment Gateway" + "Payment Successful ");
+                }
+                else
+                {
+                    Console.Write("Payment Gateway" + "Payment Failure ");
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.Write("Payment Gatway" + ex.Message);
             }
         }
 
-        public static StripeList<PaymentMethod> RetrieveCardByCustomerId(string CustomerId)
+        public static List<string> GetAllCards()
         {
-            StripeList<PaymentMethod> paymentmethods = new StripeList<PaymentMethod>();
+            List<string> ReturnResponse = new List<string>();
             try
             {
-                StripeConfiguration.ApiKey = StripeSecretApiKey;
                 var options = new PaymentMethodListOptions
                 {
-                    Customer = CustomerId,
+                    Customer = TestUserInfo,
                     Type = "card",
                 };
                 var service = new PaymentMethodService();
-                paymentmethods = service.List(options);
+                StripeList<PaymentMethod> stripeList = service.List(options);
+                foreach (PaymentMethod paymentMethod in stripeList)
+                {
+                    ReturnResponse.Add(paymentMethod.Id);
+                }
+                if (ReturnResponse.Count > 0)
+                {
+                    Console.Write("Card Count" + ReturnResponse.Count);
+                }
+                else
+                {
+                    Console.Write("Card Count" + ReturnResponse.Count);
+                }
             }
             catch (Exception ex)
             {
-
+                Console.Write("Card Count Error " + ex.Message);
             }
-            return paymentmethods;
+            return ReturnResponse;
         }
 
-        public static void PayNow()
+        public static void AddNewCard()
+        {
+            try
+            {
+                var options = new CardCreateOptions
+                {
+                    Source = TestCardToken(),
+                };
+                var service = new Stripe.CardService();
+                var response = service.Create(TestUserInfo, options);
+
+                if (response.StripeResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Console.Write("Add Card " + "Successful ");
+                }
+                else
+                {
+                    Console.Write("Add Card " + "Failure ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Write("Add Card " + ex.Message);
+            }
+        }
+
+        public static void UpdateCard()
+        {
+            try
+            {
+                var options = new CardUpdateOptions
+                {
+                    Name = TestUserName,
+                    AddressLine1 = "AddressLine1",
+                    AddressLine2 = "AddressLine2",
+                    AddressState = "AddressState",
+                    AddressCity = "AddressCity",
+                    AddressCountry = "AddressCountry",
+                    AddressZip = "123456",
+                    ExpMonth = 12,
+                    ExpYear = 25,
+
+                };
+
+                var service = new Stripe.CardService();
+                var response = service.Update(
+                    TestUserInfo,
+                    TestCardInfo,
+                    options);
+
+                if (response.StripeResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Console.Write("Update Card " + "Successful ");
+                }
+                else
+                {
+                    Console.Write("Update Card " + "Failure ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Write("Update Card " + ex.Message);
+            }
+        }
+
+        public static void DeleteCard()
+        {
+            try
+            {
+
+                var service = new Stripe.CardService();
+                var response = service.Delete(
+                    TestUserInfo,
+                    TestCardInfo);
+
+                if (response.StripeResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Console.Write("Delete Card " + "Successful ");
+                }
+                else
+                {
+                    Console.Write("Delete Card " + "Failure ");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Write("Delete Card " + ex.Message);
+            }
+        }
+
+        public static void Payment_by_PayNow()
         {
             try
             {
@@ -124,7 +262,7 @@ namespace StipePaymentDotNet48
                     {
                         Type = "paynow",
                     },
-                    Amount = 1099,
+                    Amount = TestAmount,
                     Currency = "sgd",
                 };
                 var service = new PaymentIntentService();
@@ -150,128 +288,7 @@ namespace StipePaymentDotNet48
             }
         }
 
-        public static void CreatCard(string CustomerId)
-        {
-            try
-            {
-                var options = new CardCreateOptions
-                {
-                    Source = CreateCardToken(),
-                };
-                var service = new CardService();
-                service.Create(CustomerId, options);
-            }
-            catch (Exception ex)
-            {
-
-            }
-        }
-
-        public static async void PayCommand()
-        {
-            CancellationTokenSource tokenSource = new CancellationTokenSource();
-            CancellationToken token = tokenSource.Token;
-            try
-            {
-                await Task.Run(async () =>
-                {
-                    if (PayAsCustomerorGuest)
-                    {
-                        try
-                        {
-
-                            StripeConfiguration.ApiKey = StripeSecretApiKey;
-                            var service = new PaymentIntentService();
-                            var options = new PaymentIntentCreateOptions
-                            {
-                                Amount = 1099,
-                                Currency = "sgd",
-                                Customer = TestUserInfo,
-                                PaymentMethod = CardRequestId,
-                                Confirm = true,
-                                OffSession = true,
-                            };
-                            service.Create(options);
-                        }
-                        catch (StripeException e)
-                        {
-                            //switch (e.StripeError.ErrorType)
-                            //{
-                            //    case "card_error":
-                            //        // Error code will be authentication_required if authentication is needed
-                            //        Console.WriteLine("Error code: " + e.StripeError.Code);
-                            //        var paymentIntentId = e.StripeError.PaymentIntent.Id;
-                            //        var service = new PaymentIntentService();
-                            //        var paymentIntent = service.Get(paymentIntentId);
-
-                            //        Console.WriteLine(paymentIntent.Id);
-                            //        break;
-                            //    default:
-                            //        break;
-                            //}
-                        }
-                    }
-                    else
-                    {
-                        var Token = CreateCardToken();
-                        Console.Write("Payment Gateway" + "Token :" + Token);
-                        if (Token != null)
-                        {
-                            _isTransectionSuccess = MakePayment(Token);
-                        }
-                        else
-                        {
-                        }
-                    }
-                   
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.Write("Payment Gatway" + ex.Message);
-            }
-            finally
-            {
-                if (_isTransectionSuccess)
-                {
-                    Console.Write("Payment Gateway" + "Payment Successful ");
-                }
-                else
-                {
-                    Console.Write("Payment Gateway" + "Payment Failure ");
-                }
-            }
-
-        }
-
-        public static bool MakePayment(string token)
-        {
-            try
-            {
-                StripeConfiguration.SetApiKey(StripeSecretApiKey);
-                var options = new ChargeCreateOptions
-                {
-                    Amount = (long)float.Parse("20000"),
-                    Currency = "sgd",
-                    Description = "Charge for customer",
-                    Source = stripeToken.Id,
-                    StatementDescriptor = "TEST",
-                    Capture = true,
-                };
-                //Make Payment
-                var service = new ChargeService();
-                Charge charge = service.Create(options);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.Write("Payment Gatway (CreateCharge)" + ex.Message);
-                throw ex;
-            }
-        }
-
-
-        private static string CreateCardToken()
+        private static string TestCardToken()
         {
             try
             {

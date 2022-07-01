@@ -7,35 +7,29 @@ using System.Threading.Tasks;
 
 namespace StipePaymentDotNet48
 {
-    public class CreditCardModel
+    public class PaymentCard
     {
-        [JsonProperty("exp_month")]
-        public long? ExpMonth { get; set; }
-        [JsonProperty("exp_year")]
-        public long? ExpYear { get; set; }
-        [JsonProperty("number")]
-        public string Number { get; set; }
-        [JsonProperty("address_city")]
-        public string AddressCity { get; set; }
-        [JsonProperty("address_country")]
-        public string AddressCountry { get; set; }
-        [JsonProperty("address_line1")]
+        public long VIPMasterId { get; set; }
+        public long ExpMonth { get; set; }
+        public long ExpYear { get; set; }
+        public string CVV { get; set; }
+        public string CardHolderName { get; set; }
         public string AddressLine1 { get; set; }
-        [JsonProperty("address_line2")]
         public string AddressLine2 { get; set; }
-        [JsonProperty("address_state")]
         public string AddressState { get; set; }
-        [JsonProperty("address_zip")]
+        public string AddressCity { get; set; }
+        public string AddressCountry { get; set; }
         public string AddressZip { get; set; }
-        [JsonProperty("currency")]
-        public string Currency { get; set; }
-        [JsonProperty("cvc")]
-        public string Cvc { get; set; }
-        [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("metadata")]
-        public object MetaData { get; set; }
-        [JsonProperty("issuing_card")]
-        public string IssuingCardId { get; set; }
+    }
+
+    public class PaymentModel
+    {
+        /// <summary>
+        /// Gets or sets the payment token from client.
+        /// </summary>
+        public string VipMasterId { get; set; }
+        public string Token { get; set; }
+        public long Amount { get; set; }
+        public string Description { get; set; }
     }
 }
