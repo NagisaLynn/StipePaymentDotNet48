@@ -16,7 +16,8 @@ namespace StipePaymentDotNet48
         public static string StripeSecretApiKey = "sk_test_51LCf5WBRmSsrBJTcHEHl9L1crIzPWsbUim9kgXS76adIo92S7gbweyKBg6WzByLzs5OnD8mkCr4ACDCCIShecdfn00lMxX4hfh";
 
         public static string TestUserName = "Miyamoto Musashi";
-        public static string TestCardNumb = "4242424242424242";
+        //public static string TestCardNumb = "4242424242424242"; // Visa
+        public static string TestCardNumb = "5555555555554444"; // Master
         public static string TestUserInfo = "cus_LxTGIsP7ioXDE5";
         public static string TestCardInfo = "card_1LFYKRBRmSsrBJTcYj9jcMsI";
         public static string TestDescription = "Card Testing by ";
@@ -33,6 +34,7 @@ namespace StipePaymentDotNet48
             CancellationToken token = tokenSource.Token;
             try
             {
+                StripeConfiguration.ApiKey = StripeSecretApiKey;
                 var chargeOptions = new ChargeCreateOptions
                 {
                     Amount = TestAmount,
@@ -95,6 +97,7 @@ namespace StipePaymentDotNet48
 
         public static async void Payment_by_Customer()
         {
+            StripeConfiguration.ApiKey = StripeSecretApiKey;
             CancellationTokenSource tokenSource = new CancellationTokenSource();
             CancellationToken token = tokenSource.Token;
             try
@@ -129,6 +132,7 @@ namespace StipePaymentDotNet48
 
         public static List<string> GetAllCards()
         {
+            StripeConfiguration.ApiKey = StripeSecretApiKey;
             List<string> ReturnResponse = new List<string>();
             try
             {
@@ -141,7 +145,7 @@ namespace StipePaymentDotNet48
                 StripeList<PaymentMethod> stripeList = service.List(options);
                 foreach (PaymentMethod paymentMethod in stripeList)
                 {
-                    ReturnResponse.Add(paymentMethod.Id);
+                    ReturnResponse.Add(paymentMethod.Card.Brand + " " + paymentMethod.Card.Last4 + " " +  paymentMethod.Id);
                 }
                 if (ReturnResponse.Count > 0)
                 {
@@ -163,6 +167,7 @@ namespace StipePaymentDotNet48
         {
             try
             {
+                StripeConfiguration.ApiKey = StripeSecretApiKey;
                 var options = new CardCreateOptions
                 {
                     Source = TestCardToken(),
@@ -189,6 +194,7 @@ namespace StipePaymentDotNet48
         {
             try
             {
+                StripeConfiguration.ApiKey = StripeSecretApiKey;
                 var options = new CardUpdateOptions
                 {
                     Name = TestUserName,
@@ -228,7 +234,7 @@ namespace StipePaymentDotNet48
         {
             try
             {
-
+                StripeConfiguration.ApiKey = StripeSecretApiKey;
                 var service = new Stripe.CardService();
                 var response = service.Delete(
                     TestUserInfo,
